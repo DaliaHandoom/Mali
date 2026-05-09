@@ -96,6 +96,12 @@ async function addReview() {
   const reviewInput = document.getElementById("userReview");
   const reviewStatus = document.getElementById("reviewStatus");
 
+  if (localStorage.getItem("isLoggedIn") !== "true" || !localStorage.getItem("userId")) {
+    alert("You must log in to write a review.");
+    window.location.href = "login.html";
+    return;
+  }
+
   if (!nameInput || !reviewInput || !reviewStatus) return;
 
   const name = nameInput.value.trim();
@@ -154,6 +160,10 @@ async function loadReviews() {
 
       const reviewCard = document.createElement("div");
       reviewCard.classList.add("review-card");
+
+      if (!item.review || !item.name) {
+        return;
+      }
 
       reviewCard.innerHTML = `
         <p>"${item.review}"</p>
@@ -245,6 +255,26 @@ if (contactForm) {
     return true;
   };
 
+  const validateGender = function (input) {
+    if (input.value === "") {
+      showError(input, "Please select a gender.");
+      return false;
+    }
+
+    clearError(input);
+    return true;
+  };
+
+  const validateDateOfBirth = function (input) {
+    if (input.value === "") {
+      showError(input, "Date of birth is required.");
+      return false;
+    }
+
+    clearError(input);
+    return true;
+  };
+
   const validateLanguage = function (input) {
     if (input.value === "") {
       showError(input, "Please select a language.");
@@ -284,16 +314,23 @@ if (contactForm) {
     const lastName = document.getElementById("lastName");
     const mobile = document.getElementById("mobile");
     const email = document.getElementById("email");
+    const gender = document.getElementById("gender");
+    const dateOfBirth = document.getElementById("dateOfBirth");
     const language = document.getElementById("language");
     const message = document.getElementById("message");
 
-    const isValid =
-      validateName(firstName, "First name") &&
-      validateName(lastName, "Last name") &&
-      validateMobile(mobile) &&
-      validateEmail(email) &&
-      validateLanguage(language) &&
-      validateMessage(message);
+    const validations = [
+      validateName(firstName, "First name"),
+      validateName(lastName, "Last name"),
+      validateMobile(mobile),
+      validateEmail(email),
+      validateGender(gender),
+      validateDateOfBirth(dateOfBirth),
+      validateLanguage(language),
+      validateMessage(message)
+    ];
+
+    const isValid = validations.every(value => value === true);
 
     if (!isValid) {
       formStatus.textContent = "";
@@ -306,6 +343,8 @@ if (contactForm) {
         lastName: lastName.value.trim(),
         mobile: mobile.value.trim(),
         email: email.value.trim(),
+        gender: gender.value,
+        dateOfBirth: dateOfBirth.value,
         language: language.value,
         message: message.value.trim()
       });
