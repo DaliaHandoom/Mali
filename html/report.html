@@ -7,14 +7,21 @@
   <title>View Report | Mali</title>
 
   <script>
-    if (!localStorage.getItem("isLoggedIn")) {
+    const userId = localStorage.getItem("userId");
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+
+    if (!userId || isLoggedIn !== "true") {
+      localStorage.removeItem("userId");
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("userProfile");
       window.location.href = "login.html";
     }
   </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
 
   <link rel="stylesheet" href="../css/style.css" />
 </head>
@@ -37,8 +44,9 @@
       </nav>
 
       <div class="nav-actions">
-        <a href="login.html" class="login-link">Login</a>
-        <a href="expenses.html" class="btn btn-primary">Add Expense</a>
+        <a href="login.html" class="login-link guest-only">Login</a>
+        <a href="register.html" class="btn btn-primary guest-only">Get Started</a>
+        <a href="#" onclick="logout()" class="btn btn-primary user-only">Logout</a>
       </div>
     </div>
   </header>
@@ -95,8 +103,7 @@
       <p>Designed for CCSW321 Web Development Project.</p>
     </div>
   </footer>
-
-  <script src="../js/script.js"></script>
+  <script type="module" src="../js/script.js"></script>
 </body>
 
 </html>

@@ -1,3 +1,28 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  deleteDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyALfNIX5fpVr2_vca8-lhTJCGvIi8cCxFg",
+  authDomain: "mali-bc9c5.firebaseapp.com",
+  projectId: "mali-bc9c5",
+  storageBucket: "mali-bc9c5.firebasestorage.app",
+  messagingSenderId: "972332984504",
+  appId: "1:972332984504:web:8aeabd02bbe7320a40ec4d",
+  measurementId: "G-R4H1Z6R4H4"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const menuToggle = document.getElementById("menuToggle");
 const mainNav = document.getElementById("mainNav");
 
@@ -7,81 +32,43 @@ if (menuToggle && mainNav) {
   });
 }
 
-function getUsers() {
-  return JSON.parse(localStorage.getItem("users")) || {};
-}
+document.querySelectorAll('input[type="number"]').forEach(function (input) {
+  input.addEventListener("wheel", function (event) {
+    event.preventDefault();
+    input.blur();
+  });
+});
 
-function setUsers(users) {
-  localStorage.setItem("users", JSON.stringify(users));
-}
-
-function getCurrentUserEmail() {
-  let email = localStorage.getItem("currentUserEmail");
-  if (!email) {
-    const profile = JSON.parse(localStorage.getItem("userProfile"));
-    if (profile && profile.email) {
-      email = profile.email;
-      localStorage.setItem("currentUserEmail", email);
-    }
-  }
-  return email;
-}
-
-function setCurrentUserEmail(email) {
-  if (email) {
-    localStorage.setItem("currentUserEmail", email);
-  } else {
-    localStorage.removeItem("currentUserEmail");
-  }
+function getCurrentUserId() {
+  return localStorage.getItem("userId");
 }
 
 function getCurrentUserProfile() {
-  const email = getCurrentUserEmail();
-  if (email) {
-    const users = getUsers();
-    if (users[email]) {
-      return users[email];
-    }
-  }
-
-  const fallback = JSON.parse(localStorage.getItem("userProfile"));
-  if (fallback && fallback.email) {
-    setCurrentUserEmail(fallback.email);
-    return fallback;
-  }
-  return null;
+  return JSON.parse(localStorage.getItem("userProfile")) || null;
 }
 
 function setCurrentUserProfile(profile) {
-  const users = getUsers();
-  users[profile.email] = profile;
-  setUsers(users);
   localStorage.setItem("userProfile", JSON.stringify(profile));
-  setCurrentUserEmail(profile.email);
 }
 
-function getExpensesKey(email) {
-  return `expenses_${email}`;
+function formatMoney(value) {
+  const number = parseFloat(value) || 0;
+  return number % 1 === 0 ? number.toFixed(0) : number.toFixed(2);
 }
 
-function getCurrentExpenses() {
-  const email = getCurrentUserEmail();
-  if (!email) return [];
-  return JSON.parse(localStorage.getItem(getExpensesKey(email))) || [];
+function logout() {
+  localStorage.removeItem("isLoggedIn");
+  localStorage.removeItem("userId");
+  localStorage.removeItem("userProfile");
+  window.location.href = "login.html";
 }
 
-function setCurrentExpenses(expenses) {
-  const email = getCurrentUserEmail();
-  if (!email) return;
-  localStorage.setItem(getExpensesKey(email), JSON.stringify(expenses));
-}
+window.logout = logout;
 
 /* Protected Links */
-const protectedLinks = document.querySelectorAll(".protected-link");
-
-protectedLinks.forEach(function (link) {
+document.querySelectorAll(".protected-link").forEach(function (link) {
   link.addEventListener("click", function (event) {
-    if (!localStorage.getItem("isLoggedIn")) {
+    if (!localStorage.getItem("userId")) {
       event.preventDefault();
       window.location.href = "login.html";
     }
@@ -103,13 +90,13 @@ statusButtons.forEach(function (btn) {
   });
 });
 
-/* Review Form */
-function addReview() {
+/* Reviews */
+async function addReview() {
   const nameInput = document.getElementById("userName");
   const reviewInput = document.getElementById("userReview");
   const reviewStatus = document.getElementById("reviewStatus");
 
-  if (!nameInput || !reviewInput) return;
+  if (!nameInput || !reviewInput || !reviewStatus) return;
 
   const name = nameInput.value.trim();
   const review = reviewInput.value.trim();
@@ -119,62 +106,65 @@ function addReview() {
     return;
   }
 
-  fetch("http://localhost:3000/api/reviews", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
+  try {
+    await addDoc(collection(db, "reviews"), {
       name: name,
       review: review
-    })
-  })
-    .then(function (response) {
-      return response.json();
-    })
-    .then(function (data) {
-      reviewStatus.textContent = data.message;
-      nameInput.value = "";
-      reviewInput.value = "";
-      loadReviews();
-    })
-    .catch(function () {
-      reviewStatus.textContent = "Server error. Please try again.";
     });
+
+    reviewStatus.textContent = "Review added successfully.";
+    nameInput.value = "";
+    reviewInput.value = "";
+    loadReviews();
+  } catch (error) {
+    reviewStatus.textContent = "Error adding review.";
+  }
 }
 
-function loadReviews() {
-  const reviewsContainer = document.getElementById("reviewsContainer");
+window.addReview = addReview;
 
+async function loadReviews() {
+  const reviewsContainer = document.getElementById("reviewsContainer");
   if (!reviewsContainer) return;
 
-  fetch("http://localhost:3000/api/reviews")
-    .then(function (response) {
-      return response.json();
-    })
-    .then(function (reviews) {
-      reviewsContainer.innerHTML = "";
+  try {
+    const snapshot = await getDocs(collection(db, "reviews"));
+    reviewsContainer.innerHTML = "";
 
-      if (reviews.length === 0) {
-        reviewsContainer.innerHTML = "<p>No reviews yet.</p>";
-        return;
-      }
+    if (snapshot.empty) {
+      reviewsContainer.innerHTML = `
+        <div class="review-card">
+          <p>“Mali helped me understand where my money goes every month.”</p>
+          <span>— Sarah</span>
+        </div>
+        <div class="review-card">
+          <p>“The best way to track my expenses. Simple and useful!”</p>
+          <span>— Ahmed</span>
+        </div>
+        <div class="review-card">
+          <p>“I started saving more after using Mali. Highly recommended.”</p>
+          <span>— Layan</span>
+        </div>
+      `;
+      return;
+    }
 
-      reviews.forEach(function (item) {
-        const reviewCard = document.createElement("div");
-        reviewCard.classList.add("review-card");
+    snapshot.forEach(function (docSnap) {
+      const item = docSnap.data();
 
-        reviewCard.innerHTML = `
-          <p>"${item.review}"</p>
-          <span>— ${item.name}</span>
-        `;
+      const reviewCard = document.createElement("div");
+      reviewCard.classList.add("review-card");
 
-        reviewsContainer.appendChild(reviewCard);
-      });
-    })
-    .catch(function () {
-      reviewsContainer.innerHTML = "<p>Could not load reviews.</p>";
+      reviewCard.innerHTML = `
+        <p>"${item.review}"</p>
+        <span>— ${item.name}</span>
+      `;
+
+      reviewsContainer.appendChild(reviewCard);
     });
+  } catch (error) {
+    reviewsContainer.innerHTML = "<p>Could not load reviews.</p>";
+  }
 }
 
 loadReviews();
@@ -287,7 +277,7 @@ if (contactForm) {
     return true;
   };
 
-  contactForm.addEventListener("submit", function (event) {
+  contactForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
     const firstName = document.getElementById("firstName");
@@ -297,58 +287,44 @@ if (contactForm) {
     const language = document.getElementById("language");
     const message = document.getElementById("message");
 
-    const isFirstNameValid = validateName(firstName, "First name");
-    const isLastNameValid = validateName(lastName, "Last name");
-    const isMobileValid = validateMobile(mobile);
-    const isEmailValid = validateEmail(email);
-    const isLanguageValid = validateLanguage(language);
-    const isMessageValid = validateMessage(message);
+    const isValid =
+      validateName(firstName, "First name") &&
+      validateName(lastName, "Last name") &&
+      validateMobile(mobile) &&
+      validateEmail(email) &&
+      validateLanguage(language) &&
+      validateMessage(message);
 
-    if (
-      isFirstNameValid &&
-      isLastNameValid &&
-      isMobileValid &&
-      isEmailValid &&
-      isLanguageValid &&
-      isMessageValid
-    ) {
-      fetch("http://localhost:3000/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          firstName: firstName.value,
-          lastName: lastName.value,
-          mobile: mobile.value,
-          email: email.value,
-          language: language.value,
-          message: message.value
-        })
-      })
-        .then(function (response) {
-          return response.json();
-        })
-        .then(function (data) {
-          formStatus.textContent = data.message;
-          contactForm.reset();
-        })
-        .catch(function () {
-          formStatus.textContent = "Server error. Please try again.";
-        });
-    } else {
+    if (!isValid) {
       formStatus.textContent = "";
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "contacts"), {
+        firstName: firstName.value.trim(),
+        lastName: lastName.value.trim(),
+        mobile: mobile.value.trim(),
+        email: email.value.trim(),
+        language: language.value,
+        message: message.value.trim()
+      });
+
+      formStatus.textContent = "Message sent successfully.";
+      contactForm.reset();
+    } catch (error) {
+      formStatus.textContent = "Error sending message.";
     }
   });
 }
 
-/* Register / Get Started */
+/* Register */
 const registerForm = document.getElementById("registerForm");
 
 if (registerForm) {
   const registerStatus = document.getElementById("registerStatus");
 
-  registerForm.addEventListener("submit", function (event) {
+  registerForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
     const name = document.getElementById("registerName").value.trim();
@@ -358,14 +334,7 @@ if (registerForm) {
     const ageRange = document.getElementById("ageRange").value;
     const password = document.getElementById("registerPassword").value.trim();
 
-    if (
-      name === "" ||
-      email === "" ||
-      mobile === "" ||
-      income === "" ||
-      ageRange === "" ||
-      password === ""
-    ) {
+    if (!name || !email || !mobile || !income || !ageRange || !password) {
       registerStatus.textContent = "Please fill in all fields.";
       return;
     }
@@ -385,7 +354,7 @@ if (registerForm) {
       return;
     }
 
-    if (Number(income) <= 0) {
+    if (parseFloat(income) <= 0) {
       registerStatus.textContent = "Monthly income must be greater than 0.";
       return;
     }
@@ -400,64 +369,55 @@ if (registerForm) {
       return;
     }
 
-    const users = getUsers();
-    if (users[email]) {
-      registerStatus.textContent = "An account already exists. Please login.";
-      return;
+    try {
+      const usersQuery = query(collection(db, "users"), where("email", "==", email));
+      const usersSnapshot = await getDocs(usersQuery);
+
+      if (!usersSnapshot.empty) {
+        registerStatus.textContent = "This email is already registered.";
+        return;
+      }
+
+      const userProfile = {
+        name: name,
+        email: email,
+        mobile: mobile,
+        monthlyIncome: parseFloat(income),
+        ageRange: ageRange,
+        status: selectedStatus,
+        password: password
+      };
+
+      const docRef = await addDoc(collection(db, "users"), userProfile);
+
+      userProfile.id = docRef.id;
+
+      localStorage.setItem("userId", docRef.id);
+      localStorage.setItem("isLoggedIn", "true");
+      setCurrentUserProfile(userProfile);
+
+      registerStatus.textContent = "Account created successfully.";
+
+      setTimeout(function () {
+        window.location.href = "expenses.html";
+      }, 800);
+    } catch (error) {
+      registerStatus.textContent = "Error creating account.";
     }
-
-    const userProfile = {
-      name: name,
-      email: email,
-      mobile: mobile,
-      monthlyIncome: Number(income),
-      ageRange: ageRange,
-      status: selectedStatus,
-      password: password
-    };
-
-    fetch("http://localhost:3000/api/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(userProfile)
-    })
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (data) {
-        registerStatus.textContent = data.message;
-
-        if (data.userId) {
-          localStorage.setItem("userId", data.userId);
-          localStorage.setItem("userProfile", JSON.stringify(userProfile));
-          localStorage.setItem("isLoggedIn", "true");
-
-          setTimeout(function () {
-            window.location.href = "expenses.html";
-          }, 800);
-        }
-      })
-      .catch(function () {
-        registerStatus.textContent = "Server error. Please try again.";
-      });
   });
 }
 
-/* Login Form */
+/* Login */
 const loginForm = document.getElementById("loginForm");
 
 if (loginForm) {
   const loginStatus = document.getElementById("loginStatus");
 
-  loginForm.addEventListener("submit", function (event) {
+  loginForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value.trim();
-
-
 
     if (email === "") {
       loginStatus.textContent = "Email address is required.";
@@ -478,39 +438,47 @@ if (loginForm) {
       loginStatus.textContent = "Password must be at least 6 characters.";
       return;
     }
-    fetch("http://localhost:3000/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        email: email,
-        password: password
-      })
-    })
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (data) {
-        loginStatus.textContent = data.message;
 
-        if (data.userId) {
-          localStorage.setItem("userId", data.userId);
-          localStorage.setItem("isLoggedIn", "true");
+    try {
+      const usersQuery = query(
+        collection(db, "users"),
+        where("email", "==", email),
+        where("password", "==", password)
+      );
 
-          setTimeout(function () {
-            window.location.href = "expenses.html";
-          }, 800);
-        }
-      })
-      .catch(function () {
-        loginStatus.textContent = "Server error. Please try again.";
+      const usersSnapshot = await getDocs(usersQuery);
+
+      if (usersSnapshot.empty) {
+        loginStatus.textContent = "Invalid email or password.";
+        return;
+      }
+
+      let userProfile = null;
+      let userId = "";
+
+      usersSnapshot.forEach(function (docSnap) {
+        userId = docSnap.id;
+        userProfile = docSnap.data();
       });
 
+      userProfile.id = userId;
+
+      localStorage.setItem("userId", userId);
+      localStorage.setItem("isLoggedIn", "true");
+      setCurrentUserProfile(userProfile);
+
+      loginStatus.textContent = "Login successful.";
+
+      setTimeout(function () {
+        window.location.href = "expenses.html";
+      }, 800);
+    } catch (error) {
+      loginStatus.textContent = "Error logging in.";
+    }
   });
 }
 
-/* Add Expense Form */
+/* Expenses */
 const expenseForm = document.getElementById("expenseForm");
 
 if (expenseForm) {
@@ -532,8 +500,15 @@ if (expenseForm) {
     });
   }
 
-  expenseForm.addEventListener("submit", function (event) {
+  expenseForm.addEventListener("submit", async function (event) {
     event.preventDefault();
+
+    const userId = getCurrentUserId();
+
+    if (!userId) {
+      window.location.href = "login.html";
+      return;
+    }
 
     const amount = document.getElementById("amount").value.trim();
     const categorySelect = document.getElementById("category");
@@ -542,7 +517,9 @@ if (expenseForm) {
     const date = document.getElementById("expenseDate").value;
     const note = document.getElementById("note").value.trim();
 
-    if (amount === "" || Number(amount) <= 0) {
+    const expenseAmount = parseFloat(amount);
+
+    if (amount === "" || isNaN(expenseAmount) || expenseAmount <= 0) {
       expenseStatus.textContent = "Please enter a valid amount greater than 0.";
       return;
     }
@@ -554,10 +531,12 @@ if (expenseForm) {
 
     if (category === "Other") {
       const otherValue = otherCategoryInput.value.trim();
+
       if (otherValue === "") {
         expenseStatus.textContent = "Please enter a custom category for Other.";
         return;
       }
+
       category = otherValue;
     }
 
@@ -570,125 +549,163 @@ if (expenseForm) {
       expenseStatus.textContent = "Note must not exceed 200 characters.";
       return;
     }
-    const userId = localStorage.getItem("userId");
 
-    fetch("http://localhost:3000/api/expenses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        amount: Number(amount),
+    try {
+      await addDoc(collection(db, "expenses"), {
+        amount: expenseAmount,
         category: category,
         date: date,
-        note: note
-      })
-    })
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (data) {
-        expenseStatus.textContent = data.message;
-
-        if (data.expenseId) {
-          expenseForm.reset();
-        }
-      })
-      .catch(function () {
-        expenseStatus.textContent = "Server error. Please try again.";
+        note: note,
+        userId: userId
       });
 
-    if (otherCategoryGroup) {
-      otherCategoryGroup.style.display = "none";
-      otherCategoryField.removeAttribute("required");
-      otherCategoryField.value = "";
+      expenseStatus.textContent = "Expense added successfully.";
+      expenseForm.reset();
+
+      if (otherCategoryGroup) {
+        otherCategoryGroup.style.display = "none";
+        otherCategoryField.removeAttribute("required");
+        otherCategoryField.value = "";
+      }
+    } catch (error) {
+      expenseStatus.textContent = "Error adding expense.";
     }
   });
 }
 
-/* View Report Page */
-/* View Report Page */
-
+/* Report */
 const reportList = document.getElementById("reportList");
 
-if (reportList) {
-  fetch("http://localhost:3000/api/expenses")
-    .then(function (response) {
-      return response.json();
-    })
-    .then(function (expenses) {
-      const userProfile = JSON.parse(localStorage.getItem("userProfile"));
+async function loadReport() {
+  const userId = getCurrentUserId();
 
-      let income = 2500;
+  if (!reportList) return;
 
-      if (userProfile && userProfile.monthlyIncome) {
-        income = Number(userProfile.monthlyIncome);
+  if (!userId) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  try {
+    const expensesQuery = query(collection(db, "expenses"), where("userId", "==", userId));
+    const expensesSnapshot = await getDocs(expensesQuery);
+
+    const expenses = [];
+
+    expensesSnapshot.forEach(function (docSnap) {
+      const expense = docSnap.data();
+      expense.id = docSnap.id;
+      expenses.push(expense);
+    });
+
+    const userProfile = getCurrentUserProfile();
+
+    let income = 0;
+
+    if (userProfile && userProfile.monthlyIncome) {
+      income = parseFloat(userProfile.monthlyIncome);
+    }
+
+    let totalExpenses = 0;
+    const categories = {};
+
+    expenses.forEach(function (expense) {
+      const amount = parseFloat(expense.amount) || 0;
+      totalExpenses += amount;
+
+      if (!categories[expense.category]) {
+        categories[expense.category] = 0;
       }
 
-      let totalExpenses = 0;
-      const categories = {};
+      categories[expense.category] += amount;
+    });
+
+    const balance = income - totalExpenses;
+
+    document.getElementById("reportIncome").textContent = formatMoney(income) + " SAR";
+    document.getElementById("reportExpenses").textContent = formatMoney(totalExpenses) + " SAR";
+    document.getElementById("reportBalance").textContent = formatMoney(balance) + " SAR";
+
+    let highestCategory = "No data yet";
+    let highestAmount = 0;
+
+    for (let category in categories) {
+      if (categories[category] > highestAmount) {
+        highestAmount = categories[category];
+        highestCategory = category;
+      }
+    }
+
+    document.getElementById("reportCategory").textContent = highestCategory;
+
+    if (expenses.length === 0) {
+      reportList.innerHTML = "<p>No expenses have been added yet.</p>";
+    } else {
+      reportList.innerHTML = "";
 
       expenses.forEach(function (expense) {
-        const amount = Number(expense.amount);
-        totalExpenses += amount;
+        const item = document.createElement("div");
+        item.classList.add("info-item");
 
-        if (!categories[expense.category]) {
-          categories[expense.category] = 0;
-        }
+        item.innerHTML = `
+          <h3>${expense.category}</h3>
+          <p><strong>Amount:</strong> ${formatMoney(expense.amount)} SAR</p>
+          <p><strong>Date:</strong> ${expense.date || "No date"}</p>
+          <p><strong>Note:</strong> ${expense.note || "No note added"}</p>
+        `;
 
-        categories[expense.category] += amount;
+        reportList.appendChild(item);
       });
-
-      const balance = income - totalExpenses;
-
-      document.getElementById("reportIncome").textContent = income + " SAR";
-      document.getElementById("reportExpenses").textContent = totalExpenses + " SAR";
-      document.getElementById("reportBalance").textContent = balance + " SAR";
-
-      let highestCategory = "No data yet";
-      let highestAmount = 0;
-
-      for (let category in categories) {
-        if (categories[category] > highestAmount) {
-          highestAmount = categories[category];
-          highestCategory = category;
-        }
-      }
-
-      document.getElementById("reportCategory").textContent = highestCategory;
-
-      if (expenses.length === 0) {
-        reportList.innerHTML = "<p>No expenses have been added yet.</p>";
-      } else {
-        reportList.innerHTML = "";
-
-        expenses.forEach(function (expense) {
-          const item = document.createElement("div");
-          item.classList.add("info-item");
-
-          const formattedDate = expense.date
-            ? expense.date.substring(0, 10)
-            : "No date";
-
-          item.innerHTML = `
-            <h3>${expense.category}</h3>
-            <p><strong>Amount:</strong> ${expense.amount} SAR</p>
-            <p><strong>Date:</strong> ${formattedDate}</p>
-            <p><strong>Note:</strong> ${expense.note || "No note added"}</p>
-          `;
-
-          reportList.appendChild(item);
-        });
-      }
-    })
-    .catch(function () {
-      reportList.innerHTML = "<p>Could not load report data.</p>";
-    });
+    }
+  } catch (error) {
+    reportList.innerHTML = "<p>Could not load report data.</p>";
+  }
 }
 
-/* Logout */
-function logout() {
-  localStorage.removeItem("isLoggedIn");
-  setCurrentUserEmail("");
-  window.location.href = "login.html";
+if (reportList) {
+  loadReport();
+}
+
+/* Navbar Auth UI */
+const guestItems = document.querySelectorAll(".guest-only");
+const userItems = document.querySelectorAll(".user-only");
+
+if (localStorage.getItem("userId") && localStorage.getItem("isLoggedIn") === "true") {
+  guestItems.forEach(item => item.style.display = "none");
+  userItems.forEach(item => item.style.display = "inline-flex");
+} else {
+  guestItems.forEach(item => item.style.display = "inline-flex");
+  userItems.forEach(item => item.style.display = "none");
+}
+
+/* Clear Report */
+const clearReportButton = document.getElementById("clearReportButton");
+
+if (clearReportButton) {
+  clearReportButton.addEventListener("click", async function () {
+    const userId = getCurrentUserId();
+
+    if (!userId) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    try {
+      const expensesQuery = query(collection(db, "expenses"), where("userId", "==", userId));
+      const expensesSnapshot = await getDocs(expensesQuery);
+
+      const deletePromises = [];
+
+      expensesSnapshot.forEach(function (docSnap) {
+        deletePromises.push(deleteDoc(doc(db, "expenses", docSnap.id)));
+      });
+
+      await Promise.all(deletePromises);
+
+      alert("Report cleared successfully.");
+      loadReport();
+    } catch (error) {
+      alert("Error clearing report.");
+    }
+  });
 }

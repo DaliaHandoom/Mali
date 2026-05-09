@@ -16,141 +16,142 @@
 
 <body>
 
-<header class="site-header">
-    <div class="container nav-container">
-        <a href="index.html" class="logo">Mali</a>
+    <header class="site-header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Mali</a>
 
-        <button class="menu-toggle" id="menuToggle">☰</button>
+            <button class="menu-toggle" id="menuToggle">☰</button>
 
-        <nav class="main-nav" id="mainNav">
-            <ul>
-                <li><a href="index.html" class="active">Home</a></li>
-                <li><a href="about-us.html">About</a></li>
-                <li><a href="expenses.html" class="protected-link">Expenses</a></li>
-                <li><a href="report.html" class="protected-link">Report</a></li>
-                <li><a href="contact-us.html">Contact</a></li>
-            </ul>
-        </nav>
-
-        <div class="nav-actions">
-            <a href="login.html" class="login-link">Login</a>
-            <a href="register.html" class="btn btn-primary">Get Started</a>
-        </div>
-    </div>
-</header>
-
-<main>
-
-<section class="home-hero">
-    <div class="hero-shape hero-shape-left"></div>
-    <div class="hero-shape hero-shape-right"></div>
-
-    <div class="container home-hero-content">
-        <div class="home-hero-text">
-            <p class="section-label">Smart Budget Tracker</p>
-            <h1>Manage Your Money Easily With Mali</h1>
-            <p>
-                Track your income, expenses and reach your financial goals with ease.
-            </p>
-
-            <div class="hero-buttons">
-                <a href="register.html" class="btn btn-primary">Get Started</a>
-                <a href="#features" class="btn btn-outline">Learn More</a>
+            <nav class="main-nav" id="mainNav">
+                <ul>
+                    <li><a href="index.html" class="active">Home</a></li>
+                    <li><a href="about-us.html">About</a></li>
+                    <li><a href="expenses.html" class="protected-link">Expenses</a></li>
+                    <li><a href="report.html" class="protected-link">Report</a></li>
+                    <li><a href="contact-us.html">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="nav-actions">
+                <a href="login.html" class="login-link guest-only">Login</a>
+                <a href="register.html" class="btn btn-primary guest-only">Get Started</a>
+                <a href="#" onclick="logout()" class="btn btn-primary user-only">Logout</a>
             </div>
         </div>
+    </header>
 
-        <div class="home-hero-image">
-            <div class="image-circle"></div>
-        </div>
-    </div>
-</section>
+    <main>
 
-<section class="home-features" id="features">
-    <div class="container">
+        <section class="home-hero">
+            <div class="hero-shape hero-shape-left"></div>
+            <div class="hero-shape hero-shape-right"></div>
 
-        <div class="section-heading">
-            <h2>Everything You Need in One Place</h2>
-            <p>Mali helps you organize your finances and make smarter money decisions.</p>
-        </div>
+            <div class="container home-hero-content">
+                <div class="home-hero-text">
+                    <p class="section-label">Smart Budget Tracker</p>
+                    <h1>Manage Your Money Easily With Mali</h1>
+                    <p>
+                        Track your income, expenses and reach your financial goals with ease.
+                    </p>
 
-        <div class="home-feature-grid">
+                    <div class="hero-buttons">
+                        <a href="register.html" class="btn btn-primary">Get Started</a>
+                        <a href="#features" class="btn btn-outline">Learn More</a>
+                    </div>
+                </div>
 
-            <a href="expenses.html" class="home-feature-card protected-link">
-                <h3>Add Expenses</h3>
-                <p>Record daily expenses and categorize them easily.</p>
-            </a>
-
-            <a href="report.html" class="home-feature-card protected-link">
-                <h3>View Reports</h3>
-                <p>See clear reports and charts about your spending.</p>
-            </a>
-
-            <div class="home-feature-card">
-                <h3>Simple & Secure</h3>
-                <p>Your data is safe and your privacy is our priority.</p>
+                <div class="home-hero-image">
+                    <div class="image-circle"></div>
+                </div>
             </div>
+        </section>
 
-            <div class="home-feature-card">
-                <h3>Save More</h3>
-                <p>Understand your spending and start saving more.</p>
-            </div>
+        <section class="home-features" id="features">
+            <div class="container">
 
-        </div>
+                <div class="section-heading">
+                    <h2>Everything You Need in One Place</h2>
+                    <p>Mali helps you organize your finances and make smarter money decisions.</p>
+                </div>
 
-    </div>
-</section>
+                <div class="home-feature-grid">
 
-<section class="home-testimonials">
-    <div class="container">
+                    <a href="expenses.html" class="home-feature-card protected-link">
+                        <h3>Add Expenses</h3>
+                        <p>Record daily expenses and categorize them easily.</p>
+                    </a>
 
-        <div class="section-heading">
-            <h2>What Users Say</h2>
-        </div>
+                    <a href="report.html" class="home-feature-card protected-link">
+                        <h3>View Reports</h3>
+                        <p>See clear reports and charts about your spending.</p>
+                    </a>
 
-        <div class="reviews" id="reviewsContainer">
-            <div class="review-card">
-                <p>“Mali helped me understand where my money goes every month.”</p>
-                <span>— Sarah</span>
-            </div>
+                    <div class="home-feature-card">
+                        <h3>Simple & Secure</h3>
+                        <p>Your data is safe and your privacy is our priority.</p>
+                    </div>
 
-            <div class="review-card">
-                <p>“The best way to track my expenses. Simple and useful!”</p>
-                <span>— Ahmed</span>
-            </div>
+                    <div class="home-feature-card">
+                        <h3>Save More</h3>
+                        <p>Understand your spending and start saving more.</p>
+                    </div>
 
-            <div class="review-card">
-                <p>“I started saving more after using Mali. Highly recommended.”</p>
-                <span>— Layan</span>
-            </div>
-        </div>
-
-        <section class="review-form">
-            <div class="review-form-container">
-
-                <h3>Write your review</h3>
-
-                <input type="text" id="userName" placeholder="Your name">
-                <textarea id="userReview" placeholder="Write your review..."></textarea>
-                <p id="reviewStatus" class="form-status"></p>
-
-                <button type="button" onclick="addReview()">Submit</button>
+                </div>
 
             </div>
         </section>
 
-    </div>
-</section>
+        <section class="home-testimonials">
+            <div class="container">
 
-</main>
+                <div class="section-heading">
+                    <h2>What Users Say</h2>
+                </div>
 
-<footer class="site-footer">
-    <div class="container footer-content">
-        <p>&copy; 2026 Mali. All rights reserved.</p>
-        <p>Designed for CCSW321 Web Development Project.</p>
-    </div>
-</footer>
+                <div class="reviews" id="reviewsContainer">
+                    <div class="review-card">
+                        <p>“Mali helped me understand where my money goes every month.”</p>
+                        <span>— Sarah</span>
+                    </div>
 
-<script src="../js/script.js"></script>
+                    <div class="review-card">
+                        <p>“The best way to track my expenses. Simple and useful!”</p>
+                        <span>— Ahmed</span>
+                    </div>
+
+                    <div class="review-card">
+                        <p>“I started saving more after using Mali. Highly recommended.”</p>
+                        <span>— Layan</span>
+                    </div>
+                </div>
+
+                <section class="review-form">
+                    <div class="review-form-container">
+
+                        <h3>Write your review</h3>
+
+                        <input type="text" id="userName" placeholder="Your name">
+                        <textarea id="userReview" placeholder="Write your review..."></textarea>
+                        <p id="reviewStatus" class="form-status"></p>
+
+                        <button type="button" onclick="addReview()">Submit</button>
+
+                    </div>
+                </section>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 Mali. All rights reserved.</p>
+            <p>Designed for CCSW321 Web Development Project.</p>
+        </div>
+    </footer>
+
+    <script type="module" src="../js/script.js"></script>
 
 </body>
+
 </html>

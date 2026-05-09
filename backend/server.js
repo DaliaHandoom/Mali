@@ -1,4 +1,3 @@
-
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2");
@@ -48,21 +47,34 @@ app.post("/api/register", function (req, res) {
     }
 
     const sql = `
-      INSERT INTO users (name, email, mobile, income, password)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO users (name, email, mobile, income, age_range, status, password)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
-    db.query(sql, [name, email, mobile, Number(monthlyIncome), password], function (err, result) {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({ message: "Database error." });
-      }
+    db.query(
+      sql,
+      [name, email, mobile, Number(monthlyIncome), ageRange, status, password],
+      function (err, result) {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ message: "Database error." });
+        }
 
-      res.json({
-        message: "Account created successfully!",
-        userId: result.insertId
-      });
-    });
+        res.json({
+          message: "Account created successfully!",
+          userId: result.insertId,
+          user: {
+            id: result.insertId,
+            name: name,
+            email: email,
+            mobile: mobile,
+            monthlyIncome: Number(monthlyIncome),
+            ageRange: ageRange,
+            status: status
+          }
+        });
+      }
+    );
   });
 });
 
@@ -100,7 +112,9 @@ app.post("/api/login", function (req, res) {
         name: user.name,
         email: user.email,
         mobile: user.mobile,
-        monthlyIncome: user.income
+        monthlyIncome: user.income,
+        ageRange: user.age_range,
+        status: user.status
       }
     });
   });
@@ -108,7 +122,11 @@ app.post("/api/login", function (req, res) {
 
 /* ADD EXPENSE */
 app.post("/api/expenses", function (req, res) {
-  const { amount, category, date, note } = req.body;
+  const { amount, category, date, note, userId } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ message: "User is required. Please login again." });
+  }
 
   if (!amount || !category || !date) {
     return res.status(400).json({ message: "Please fill in all required fields." });
@@ -119,11 +137,11 @@ app.post("/api/expenses", function (req, res) {
   }
 
   const sql = `
-    INSERT INTO expenses (amount, category, date, note)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO expenses (user_id, amount, category, date, note)
+    VALUES (?, ?, ?, ?, ?)
   `;
 
-  db.query(sql, [Number(amount), category, date, note || ""], function (err, result) {
+  db.query(sql, [userId, Number(amount), category, date, note || ""], function (err, result) {
     if (err) {
       console.log(err);
       return res.status(500).json({ message: "Database error." });
@@ -136,17 +154,43 @@ app.post("/api/expenses", function (req, res) {
   });
 });
 
-/* GET EXPENSES */
-app.get("/api/expenses", function (req, res) {
-  const sql = "SELECT * FROM expenses ORDER BY id DESC";
+/* GET EXPENSES FOR ONE USER */
+app.get("/api/expenses/:userId", function (req, res) {
+  const userId = req.params.userId;
 
-  db.query(sql, function (err, results) {
+  if (!userId) {
+    return res.status(400).json({ message: "User is required." });
+  }
+
+  const sql = "SELECT * FROM expenses WHERE user_id = ? ORDER BY id DESC";
+
+  db.query(sql, [userId], function (err, results) {
     if (err) {
       console.log(err);
       return res.status(500).json({ message: "Database error." });
     }
 
     res.json(results);
+  });
+});
+
+/* CLEAR EXPENSES FOR ONE USER */
+app.delete("/api/expenses/:userId", function (req, res) {
+  const userId = req.params.userId;
+
+  if (!userId) {
+    return res.status(400).json({ message: "User is required." });
+  }
+
+  const sql = "DELETE FROM expenses WHERE user_id = ?";
+
+  db.query(sql, [userId], function (err) {
+    if (err) {
+      console.log(err);
+      return res.status(500).json({ message: "Database error." });
+    }
+
+    res.json({ message: "Report cleared successfully!" });
   });
 });
 
