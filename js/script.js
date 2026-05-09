@@ -1,3 +1,4 @@
+// Firebase Configuration and Initialization
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getFirestore,
@@ -23,6 +24,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// Navbar
 const menuToggle = document.getElementById("menuToggle");
 const mainNav = document.getElementById("mainNav");
 
@@ -32,13 +34,18 @@ if (menuToggle && mainNav) {
   });
 }
 
-document.querySelectorAll('input[type="number"]').forEach(function (input) {
-  input.addEventListener("wheel", function (event) {
-    event.preventDefault();
-    input.blur();
-  });
-});
+const guestItems = document.querySelectorAll(".guest-only");
+const userItems = document.querySelectorAll(".user-only");
 
+if (localStorage.getItem("userId") && localStorage.getItem("isLoggedIn") === "true") {
+  guestItems.forEach(item => item.style.display = "none");
+  userItems.forEach(item => item.style.display = "inline-flex");
+} else {
+  guestItems.forEach(item => item.style.display = "inline-flex");
+  userItems.forEach(item => item.style.display = "none");
+}
+
+// Helper Functions
 function getCurrentUserId() {
   return localStorage.getItem("userId");
 }
@@ -65,7 +72,7 @@ function logout() {
 
 window.logout = logout;
 
-/* Protected Links */
+// Protected Pages
 document.querySelectorAll(".protected-link").forEach(function (link) {
   link.addEventListener("click", function (event) {
     if (!localStorage.getItem("userId")) {
@@ -75,7 +82,15 @@ document.querySelectorAll(".protected-link").forEach(function (link) {
   });
 });
 
-/* Status Buttons */
+// Number Input
+document.querySelectorAll('input[type="number"]').forEach(function (input) {
+  input.addEventListener("wheel", function (event) {
+    event.preventDefault();
+    input.blur();
+  });
+});
+
+// Register Page
 const statusButtons = document.querySelectorAll(".status-btn");
 let selectedStatus = "";
 
@@ -90,7 +105,166 @@ statusButtons.forEach(function (btn) {
   });
 });
 
-/* Reviews */
+const registerForm = document.getElementById("registerForm");
+
+if (registerForm) {
+  const registerStatus = document.getElementById("registerStatus");
+
+  registerForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const name = document.getElementById("registerName").value.trim();
+    const email = document.getElementById("registerEmail").value.trim();
+    const mobile = document.getElementById("registerMobile").value.trim();
+    const income = document.getElementById("monthlyIncome").value.trim();
+    const ageRange = document.getElementById("ageRange").value;
+    const password = document.getElementById("registerPassword").value.trim();
+
+    if (!name || !email || !mobile || !income || !ageRange || !password) {
+      registerStatus.textContent = "Please fill in all fields.";
+      return;
+    }
+
+    if (!/^[A-Za-z\s]{2,30}$/.test(name)) {
+      registerStatus.textContent = "Name must contain only letters and be 2 to 30 characters.";
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      registerStatus.textContent = "Please enter a valid email address.";
+      return;
+    }
+
+    if (!/^05[0-9]{8}$/.test(mobile)) {
+      registerStatus.textContent = "Mobile number must start with 05 and contain 10 digits.";
+      return;
+    }
+
+    if (parseFloat(income) <= 0) {
+      registerStatus.textContent = "Monthly income must be greater than 0.";
+      return;
+    }
+
+    if (password.length < 6) {
+      registerStatus.textContent = "Password must be at least 6 characters.";
+      return;
+    }
+
+    if (selectedStatus === "") {
+      registerStatus.textContent = "Please select your status.";
+      return;
+    }
+
+    try {
+      const usersQuery = query(collection(db, "users"), where("email", "==", email));
+      const usersSnapshot = await getDocs(usersQuery);
+
+      if (!usersSnapshot.empty) {
+        registerStatus.textContent = "This email is already registered.";
+        return;
+      }
+
+      const userProfile = {
+        name: name,
+        email: email,
+        mobile: mobile,
+        monthlyIncome: parseFloat(income),
+        ageRange: ageRange,
+        status: selectedStatus,
+        password: password
+      };
+
+      const docRef = await addDoc(collection(db, "users"), userProfile);
+
+      userProfile.id = docRef.id;
+
+      localStorage.setItem("userId", docRef.id);
+      localStorage.setItem("isLoggedIn", "true");
+      setCurrentUserProfile(userProfile);
+
+      registerStatus.textContent = "Account created successfully.";
+
+      setTimeout(function () {
+        window.location.href = "expenses.html";
+      }, 800);
+    } catch (error) {
+      registerStatus.textContent = "Error creating account.";
+    }
+  });
+}
+
+// Login Page
+const loginForm = document.getElementById("loginForm");
+
+if (loginForm) {
+  const loginStatus = document.getElementById("loginStatus");
+
+  loginForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value.trim();
+
+    if (email === "") {
+      loginStatus.textContent = "Email address is required.";
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      loginStatus.textContent = "Please enter a valid email address.";
+      return;
+    }
+
+    if (password === "") {
+      loginStatus.textContent = "Password is required.";
+      return;
+    }
+
+    if (password.length < 6) {
+      loginStatus.textContent = "Password must be at least 6 characters.";
+      return;
+    }
+
+    try {
+      const usersQuery = query(
+        collection(db, "users"),
+        where("email", "==", email),
+        where("password", "==", password)
+      );
+
+      const usersSnapshot = await getDocs(usersQuery);
+
+      if (usersSnapshot.empty) {
+        loginStatus.textContent = "Invalid email or password.";
+        return;
+      }
+
+      let userProfile = null;
+      let userId = "";
+
+      usersSnapshot.forEach(function (docSnap) {
+        userId = docSnap.id;
+        userProfile = docSnap.data();
+      });
+
+      userProfile.id = userId;
+
+      localStorage.setItem("userId", userId);
+      localStorage.setItem("isLoggedIn", "true");
+      setCurrentUserProfile(userProfile);
+
+      loginStatus.textContent = "Login successful.";
+
+      setTimeout(function () {
+        window.location.href = "expenses.html";
+      }, 800);
+    } catch (error) {
+      loginStatus.textContent = "Error logging in.";
+    }
+  });
+}
+
+// Reviews Section
 async function addReview() {
   const nameInput = document.getElementById("userName");
   const reviewInput = document.getElementById("userReview");
@@ -158,12 +332,12 @@ async function loadReviews() {
     snapshot.forEach(function (docSnap) {
       const item = docSnap.data();
 
-      const reviewCard = document.createElement("div");
-      reviewCard.classList.add("review-card");
-
       if (!item.review || !item.name) {
         return;
       }
+
+      const reviewCard = document.createElement("div");
+      reviewCard.classList.add("review-card");
 
       reviewCard.innerHTML = `
         <p>"${item.review}"</p>
@@ -179,7 +353,7 @@ async function loadReviews() {
 
 loadReviews();
 
-/* Contact Form */
+// Contact Page
 const contactForm = document.getElementById("contactForm");
 
 if (contactForm) {
@@ -357,167 +531,7 @@ if (contactForm) {
   });
 }
 
-/* Register */
-const registerForm = document.getElementById("registerForm");
-
-if (registerForm) {
-  const registerStatus = document.getElementById("registerStatus");
-
-  registerForm.addEventListener("submit", async function (event) {
-    event.preventDefault();
-
-    const name = document.getElementById("registerName").value.trim();
-    const email = document.getElementById("registerEmail").value.trim();
-    const mobile = document.getElementById("registerMobile").value.trim();
-    const income = document.getElementById("monthlyIncome").value.trim();
-    const ageRange = document.getElementById("ageRange").value;
-    const password = document.getElementById("registerPassword").value.trim();
-
-    if (!name || !email || !mobile || !income || !ageRange || !password) {
-      registerStatus.textContent = "Please fill in all fields.";
-      return;
-    }
-
-    if (!/^[A-Za-z\s]{2,30}$/.test(name)) {
-      registerStatus.textContent = "Name must contain only letters and be 2 to 30 characters.";
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      registerStatus.textContent = "Please enter a valid email address.";
-      return;
-    }
-
-    if (!/^05[0-9]{8}$/.test(mobile)) {
-      registerStatus.textContent = "Mobile number must start with 05 and contain 10 digits.";
-      return;
-    }
-
-    if (parseFloat(income) <= 0) {
-      registerStatus.textContent = "Monthly income must be greater than 0.";
-      return;
-    }
-
-    if (password.length < 6) {
-      registerStatus.textContent = "Password must be at least 6 characters.";
-      return;
-    }
-
-    if (selectedStatus === "") {
-      registerStatus.textContent = "Please select your status.";
-      return;
-    }
-
-    try {
-      const usersQuery = query(collection(db, "users"), where("email", "==", email));
-      const usersSnapshot = await getDocs(usersQuery);
-
-      if (!usersSnapshot.empty) {
-        registerStatus.textContent = "This email is already registered.";
-        return;
-      }
-
-      const userProfile = {
-        name: name,
-        email: email,
-        mobile: mobile,
-        monthlyIncome: parseFloat(income),
-        ageRange: ageRange,
-        status: selectedStatus,
-        password: password
-      };
-
-      const docRef = await addDoc(collection(db, "users"), userProfile);
-
-      userProfile.id = docRef.id;
-
-      localStorage.setItem("userId", docRef.id);
-      localStorage.setItem("isLoggedIn", "true");
-      setCurrentUserProfile(userProfile);
-
-      registerStatus.textContent = "Account created successfully.";
-
-      setTimeout(function () {
-        window.location.href = "expenses.html";
-      }, 800);
-    } catch (error) {
-      registerStatus.textContent = "Error creating account.";
-    }
-  });
-}
-
-/* Login */
-const loginForm = document.getElementById("loginForm");
-
-if (loginForm) {
-  const loginStatus = document.getElementById("loginStatus");
-
-  loginForm.addEventListener("submit", async function (event) {
-    event.preventDefault();
-
-    const email = document.getElementById("loginEmail").value.trim();
-    const password = document.getElementById("loginPassword").value.trim();
-
-    if (email === "") {
-      loginStatus.textContent = "Email address is required.";
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      loginStatus.textContent = "Please enter a valid email address.";
-      return;
-    }
-
-    if (password === "") {
-      loginStatus.textContent = "Password is required.";
-      return;
-    }
-
-    if (password.length < 6) {
-      loginStatus.textContent = "Password must be at least 6 characters.";
-      return;
-    }
-
-    try {
-      const usersQuery = query(
-        collection(db, "users"),
-        where("email", "==", email),
-        where("password", "==", password)
-      );
-
-      const usersSnapshot = await getDocs(usersQuery);
-
-      if (usersSnapshot.empty) {
-        loginStatus.textContent = "Invalid email or password.";
-        return;
-      }
-
-      let userProfile = null;
-      let userId = "";
-
-      usersSnapshot.forEach(function (docSnap) {
-        userId = docSnap.id;
-        userProfile = docSnap.data();
-      });
-
-      userProfile.id = userId;
-
-      localStorage.setItem("userId", userId);
-      localStorage.setItem("isLoggedIn", "true");
-      setCurrentUserProfile(userProfile);
-
-      loginStatus.textContent = "Login successful.";
-
-      setTimeout(function () {
-        window.location.href = "expenses.html";
-      }, 800);
-    } catch (error) {
-      loginStatus.textContent = "Error logging in.";
-    }
-  });
-}
-
-/* Expenses */
+// Expenses Page
 const expenseForm = document.getElementById("expenseForm");
 
 if (expenseForm) {
@@ -612,7 +626,7 @@ if (expenseForm) {
   });
 }
 
-/* Report */
+// Report Page
 const reportList = document.getElementById("reportList");
 
 async function loadReport() {
@@ -705,19 +719,7 @@ if (reportList) {
   loadReport();
 }
 
-/* Navbar Auth UI */
-const guestItems = document.querySelectorAll(".guest-only");
-const userItems = document.querySelectorAll(".user-only");
-
-if (localStorage.getItem("userId") && localStorage.getItem("isLoggedIn") === "true") {
-  guestItems.forEach(item => item.style.display = "none");
-  userItems.forEach(item => item.style.display = "inline-flex");
-} else {
-  guestItems.forEach(item => item.style.display = "inline-flex");
-  userItems.forEach(item => item.style.display = "none");
-}
-
-/* Clear Report */
+// Clear Report
 const clearReportButton = document.getElementById("clearReportButton");
 
 if (clearReportButton) {

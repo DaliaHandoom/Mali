@@ -9,19 +9,15 @@
     --bg-secondary: #20294d;
     --bg-card: #222d55;
     --bg-soft: rgba(255, 255, 255, 0.045);
-
     --primary: #63a6ff;
     --primary-light: #8dbdff;
     --primary-dark: #2f86e8;
     --cyan: #28c7ff;
-
     --white: #ffffff;
     --text-soft: #d7def5;
     --text-muted: #aeb9dc;
-
     --border: rgba(255, 255, 255, 0.16);
     --border-strong: rgba(141, 189, 255, 0.38);
-
     --shadow: 0 24px 55px rgba(0, 0, 0, 0.25);
     --radius: 18px;
 }
@@ -174,7 +170,7 @@ ul {
     background: rgba(99, 166, 255, 0.08);
 }
 
-/* LABEL */
+/* SHARED TEXT */
 .section-label {
     color: var(--primary-light) !important;
     font-weight: 800;
@@ -262,14 +258,11 @@ ul {
     align-items: center;
 }
 
-.home-hero-image .image-circle,
-.hero-image .image-circle,
 .image-circle {
     width: 420px;
     height: 420px;
     border-radius: 50%;
-    background:
-        linear-gradient(135deg, rgba(99, 166, 255, 0.80), rgba(40, 199, 255, 0.22));
+    background: linear-gradient(135deg, rgba(99, 166, 255, 0.80), rgba(40, 199, 255, 0.22));
     position: relative;
     z-index: 1;
     box-shadow:
@@ -351,7 +344,7 @@ ul {
     line-height: 1.7;
 }
 
-/* TESTIMONIALS */
+/* REVIEWS SECTION */
 .home-testimonials {
     padding: 55px 0 90px;
 }
@@ -386,94 +379,6 @@ ul {
 .testimonial-card h4 {
     color: var(--primary-light);
     font-size: 0.9rem;
-}
-
-/* REVIEW FORM */
-.review-form {
-    margin-top: 120px;
-    display: flex;
-    justify-content: center;
-}
-
-.review-form-container {
-    width: 600px;
-    padding: 40px;
-    border-radius: 25px;
-    background: linear-gradient(135deg, #1f2a44, #2c3a5c);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow:
-        0 0 40px rgba(111, 123, 101, 0.2),
-        0 10px 40px rgba(0, 0, 0, 0.4);
-    text-align: center;
-}
-
-.review-form-container h3 {
-    color: white;
-    margin-bottom: 25px;
-    font-size: 22px;
-}
-
-.review-form-container input,
-.review-form-container textarea {
-    width: 100%;
-    padding: 14px;
-    margin-bottom: 15px;
-    border: none;
-    border-radius: 12px;
-    background: #2a3550;
-    color: #fff;
-    outline: none;
-}
-
-.review-form-container textarea {
-    min-height: 120px;
-    resize: vertical;
-}
-
-.review-form-container input::placeholder,
-.review-form-container textarea::placeholder {
-    color: rgba(255, 255, 255, 0.6);
-}
-
-.review-form-container button {
-    margin-top: 10px;
-    background: #6f7b65;
-    color: white;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.review-form-container button:hover {
-    background: #5a6652;
-    box-shadow: 0 0 15px rgba(111, 123, 101, 0.5);
-}
-
-.review-form-container:hover {
-    box-shadow:
-        0 0 50px rgba(100, 140, 255, 0.5),
-        0 0 100px rgba(100, 140, 255, 0.3),
-        0 0 150px rgba(100, 140, 255, 0.2);
-    transform: translateY(-5px);
-    transition: 0.3s ease;
-}
-
-.review-form-container input:hover,
-.review-form-container textarea:hover {
-    box-shadow: 0 0 15px rgba(100, 140, 255, 0.5);
-}
-
-.review-form-container input:focus,
-.review-form-container textarea:focus {
-    box-shadow: 0 0 20px rgba(73, 70, 247, 0.7);
-}
-
-.review-form-container,
-.review-form-container input,
-.review-form-container textarea {
-    transition: 0.3s ease;
 }
 
 .reviews {
@@ -520,7 +425,90 @@ ul {
     font-weight: 700;
 }
 
-/* PREVIEW / PROJECT IDEA */
+/* REVIEW FORM */
+.review-form {
+    margin-top: 120px;
+    display: flex;
+    justify-content: center;
+}
+
+.review-form-container {
+    width: 600px;
+    padding: 40px;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #1f2a44, #2c3a5c);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 0 40px rgba(111, 123, 101, 0.2),
+        0 10px 40px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    transition: 0.3s ease;
+}
+
+.review-form-container:hover {
+    box-shadow:
+        0 0 50px rgba(100, 140, 255, 0.5),
+        0 0 100px rgba(100, 140, 255, 0.3),
+        0 0 150px rgba(100, 140, 255, 0.2);
+    transform: translateY(-5px);
+}
+
+.review-form-container h3 {
+    color: white;
+    margin-bottom: 25px;
+    font-size: 22px;
+}
+
+.review-form-container input,
+.review-form-container textarea {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 12px;
+    background: #2a3550;
+    color: #fff;
+    outline: none;
+    transition: 0.3s ease;
+}
+
+.review-form-container textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.review-form-container input::placeholder,
+.review-form-container textarea::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.review-form-container input:hover,
+.review-form-container textarea:hover {
+    box-shadow: 0 0 15px rgba(100, 140, 255, 0.5);
+}
+
+.review-form-container input:focus,
+.review-form-container textarea:focus {
+    box-shadow: 0 0 20px rgba(73, 70, 247, 0.7);
+}
+
+.review-form-container button {
+    margin-top: 10px;
+    background: #6f7b65;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.review-form-container button:hover {
+    background: #5a6652;
+    box-shadow: 0 0 15px rgba(111, 123, 101, 0.5);
+}
+
+/* PROJECT IDEA SECTION */
 .preview {
     padding: 45px 0 25px;
 }
@@ -584,22 +572,14 @@ ul {
 }
 
 /* ABOUT PAGE */
-
 .goals-box {
     width: 100%;
-    /* يخلي البوكس ياخذ نفس عرض المكان */
     max-width: 600px;
-    /* يمنع يصير صغير مرة */
-
     padding: 35px 40px;
-    /* 👈 يعطي راحة للنص */
-
     border-radius: 20px;
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(15px);
-
     border: 1px solid rgba(255, 255, 255, 0.1);
-
     box-shadow:
         0 0 30px rgba(111, 123, 101, 0.2),
         0 10px 30px rgba(0, 0, 0, 0.3);
@@ -634,7 +614,6 @@ ul {
     gap: 28px;
     width: max-content;
     animation: teamScroll 28s linear infinite;
-
 }
 
 .team-slider:hover .team-track {
@@ -683,7 +662,6 @@ ul {
     margin-top: 12px;
     color: #9dbbff;
     font-weight: 700;
-    text-decoration: none;
 }
 
 .team-card a:hover {
@@ -700,13 +678,18 @@ ul {
     }
 }
 
-/*contact*/
+/* CONTACT PAGE */
 .contact-top {
     padding-bottom: 28px;
 }
 
 .contact-section {
     padding: 35px 0 90px;
+}
+
+.visually-hidden {
+    position: absolute;
+    left: -9999px;
 }
 
 .contact-grid {
@@ -739,6 +722,58 @@ ul {
     font-size: 1rem;
 }
 
+.contact-info-list {
+    display: grid;
+    gap: 18px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    min-height: 92px;
+    padding: 20px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(141, 189, 255, 0.16);
+    transition: 0.3s ease;
+}
+
+.info-item:hover {
+    transform: translateX(6px);
+    border-color: rgba(141, 189, 255, 0.45);
+    background: rgba(255, 255, 255, 0.055);
+}
+
+.info-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(95, 162, 255, 0.15);
+    box-shadow: 0 10px 25px rgba(95, 162, 255, 0.14);
+    flex-shrink: 0;
+}
+
+.info-icon i {
+    color: #7fb3ff;
+    font-size: 22px;
+}
+
+.info-item h3 {
+    color: var(--white);
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+}
+
+.info-item p {
+    color: var(--text-soft);
+    margin: 0;
+}
+
+/* FORMS */
 .styled-form {
     display: grid;
     gap: 20px;
@@ -805,14 +840,6 @@ ul {
     color: #ffffff;
 }
 
-.form-submit-btn {
-    width: auto;
-    border: none;
-    cursor: pointer;
-    margin-top: 4px;
-}
-
-/* Gender and Date of Birth fields */
 .form-group input[type="date"] {
     color-scheme: dark;
 }
@@ -826,6 +853,13 @@ ul {
 .form-group select#gender,
 .form-group input#dateOfBirth {
     min-height: 56px;
+}
+
+.form-submit-btn {
+    width: auto;
+    border: none;
+    cursor: pointer;
+    margin-top: 4px;
 }
 
 .button-row {
@@ -857,73 +891,6 @@ ul {
 
 .input-error {
     border-color: #ff6b6b !important;
-}
-
-.contact-info-list {
-    display: grid;
-    gap: 18px;
-}
-
-.info-item {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    min-height: 92px;
-    padding: 20px;
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.035);
-    border: 1px solid rgba(141, 189, 255, 0.16);
-    transition: 0.3s ease;
-}
-
-.info-item:hover {
-    transform: translateX(6px);
-    border-color: rgba(141, 189, 255, 0.45);
-    background: rgba(255, 255, 255, 0.055);
-}
-
-.info-icon {
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(95, 162, 255, 0.15);
-    box-shadow: 0 10px 25px rgba(95, 162, 255, 0.14);
-    flex-shrink: 0;
-}
-
-.info-icon i {
-    color: #7fb3ff;
-    font-size: 22px;
-}
-
-.info-item h3 {
-    color: var(--white);
-    font-size: 1.05rem;
-    margin-bottom: 4px;
-}
-
-.info-item p {
-    color: var(--text-soft);
-    margin: 0;
-}
-
-@media (max-width: 992px) {
-    .contact-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-
-    .form-submit-btn {
-        width: 100%;
-    }
 }
 
 /* REGISTER PAGE */
@@ -1005,9 +972,6 @@ ul {
 
 .report-box .info-item {
     margin-bottom: 0;
-}
-
-.report-box .info-item {
     justify-content: space-between;
     align-items: flex-start;
 }
@@ -1023,16 +987,6 @@ ul {
 
 .report-box .info-item p {
     margin-top: 6px;
-}
-
-.delete-btn {
-    min-width: 100px;
-    padding: 10px 16px;
-    border-radius: 14px;
-    font-size: 0.95rem;
-    color: var(--white);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(255, 255, 255, 0.04);
 }
 
 .delete-btn {
@@ -1086,7 +1040,7 @@ ul {
     font-size: 0.9rem;
 }
 
-/* RESPONSIVE */
+/* RESPONSIVE DESIGN */
 @media (max-width: 992px) {
     .nav-container {
         flex-wrap: wrap;
@@ -1125,8 +1079,6 @@ ul {
         min-height: auto;
     }
 
-    .home-hero-image .image-circle,
-    .hero-image .image-circle,
     .image-circle {
         width: 320px;
         height: 320px;
@@ -1157,6 +1109,10 @@ ul {
     }
 
     .review-form-container {
+        width: 100%;
+    }
+
+    .form-submit-btn {
         width: 100%;
     }
 
